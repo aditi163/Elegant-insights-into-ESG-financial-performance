@@ -400,7 +400,6 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
-import plotly.io as pio
 
 # ------------------- Page Config -------------------
 st.set_page_config(
@@ -473,10 +472,10 @@ h1, h2, h3, h4 {
 }
 .card:hover { 
     transform: translateY(-8px); 
-    box-shadow: 0 10px 25px rgba(0,200,83,0.3);
+    box-shadow: 0 10px 25px rgba(0,200,83,0.3); /* Emerald green glow */
 }
 .card-title { font-size: 16px; color: #b0b0b0; margin-bottom: 6px; font-weight: 500;}
-.card-value { font-size: 28px; font-weight: 700; color: #00C853; }
+.card-value { font-size: 28px; font-weight: 700; color: #00C853; } /* Emerald Green */
 
 /* Plot Container Styling */
 .st-emotion-cache-16p0lgr {
@@ -588,9 +587,6 @@ for i, (metric, value) in enumerate(metrics.items()):
 
 # ------------------- PLOTS -------------------
 
-# Set the default Plotly template for the entire app
-pio.templates.default = 'plotly_dark'
-
 # 1. ESG Score Distribution (Histogram)
 st.subheader("ESG Score Distribution")
 fig_hist = px.histogram(
@@ -602,6 +598,7 @@ fig_hist = px.histogram(
 )
 fig_hist.update_traces(marker=dict(line=dict(width=1, color='rgba(0,0,0,0.2)')))
 fig_hist.update_layout(
+    template='plotly_dark',
     paper_bgcolor='rgba(0,0,0,0)',
     plot_bgcolor='rgba(0,0,0,0)',
     xaxis=dict(title="ESG Overall Score", showgrid=True, gridcolor="#2b2b2b"),
@@ -626,6 +623,7 @@ with col1:
     )
     fig_scatter.update_traces(marker=dict(line=dict(width=1, color='rgba(0,0,0,0.3)')))
     fig_scatter.update_layout(
+        template='plotly_dark',
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         xaxis=dict(title="ESG Overall Score", showgrid=True, gridcolor="#2b2b2b"),
@@ -634,7 +632,7 @@ with col1:
     st.plotly_chart(fig_scatter, use_container_width=True)
 
 with col2:
-    st.subheader("Profit Margin by Industry (Enhanced Box Plot)")
+    st.subheader("Profit Margin by Industry")
     fig_box = px.box(
         df,
         x="Industry",
@@ -653,6 +651,7 @@ with col2:
         jitter=0.4
     )
     fig_box.update_layout(
+        template='plotly_dark',
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         xaxis_title="Industry",
@@ -680,6 +679,7 @@ fig_radar = go.Figure(data=go.Scatterpolar(
     hovertemplate="<b>%{theta}</b>: %{r:.2f}<extra></extra>"
 ))
 fig_radar.update_layout(
+    template='plotly_dark',
     paper_bgcolor='rgba(0,0,0,0)',
     polar=dict(
         bgcolor='#1e1e1e',
@@ -700,4 +700,4 @@ fig_radar.update_layout(
 st.plotly_chart(fig_radar, use_container_width=True)
 
 # ------------------- Footer -------------------
-st.markdown("<div class='footer'>🌿 ESG Dashboard &copy; 2025 | Optimized for Dual Theme</div>", unsafe_allow_html=True)
+st.markdown("<div class='footer'>🌿 ESG Dashboard &copy; 2025 </div>", unsafe_allow_html=True)
