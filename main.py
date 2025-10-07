@@ -5,17 +5,17 @@ import plotly.graph_objects as go
 import numpy as np
 import plotly.io as pio
 
+# ------------------- Set Plotly Default Template -------------------
+# This is the key fix. It sets the template for ALL charts created below.
+# 'plotly_dark' is the template name for the dark theme.
+pio.templates.default = 'plotly_dark'
+
 # ------------------- Page Config -------------------
 st.set_page_config(
     page_title="ESG Cinematic Dashboard",
     layout="wide",
     page_icon="🌿",
 )
-
-# ------------------- Set Plotly Default Template -------------------
-# This is the key fix. It sets the template for ALL charts created below.
-# 'plotly_dark' is the template name for the dark theme.
-pio.templates.default = 'plotly_dark'
 
 # ------------------- Custom Dark Theme CSS -------------------
 st.markdown("""
@@ -39,8 +39,11 @@ st.markdown("""
     box-shadow: 0 4px 15px rgba(0,0,0,0.5);
 }
 
-/* Sidebar labels and headers */
-[data-testid="stSidebar"] h2, .st-emotion-cache-1kyx2u8, .st-emotion-cache-1wv0235 {
+/* Ensure sidebar labels and headers are visible and correctly colored */
+.st-emotion-cache-1wv0235,
+.st-emotion-cache-1kyx2u8,
+.st-emotion-cache-1d391kg h2,
+.st-emotion-cache-1d391kg h3 {
     color: #e0e0e0 !important;
     font-weight: 600;
 }
