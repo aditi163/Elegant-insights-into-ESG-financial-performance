@@ -37,7 +37,7 @@ st.markdown("""
 # --- LOAD DATA ---
 @st.cache_data
 def load_data():
-    df = pd.read_csv("esg_data.csv")
+    df = pd.read_csv("company_esg_financial_dataset.csv")
     return df
 
 data = load_data()
