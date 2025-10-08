@@ -1,111 +1,86 @@
-# pip install streamlit pandas plotly yfinance
-
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
-import numpy as np
 
-# ------------------- Page Config -------------------
-st.set_page_config(
-    page_title="ESG Cinematic Dashboard",
-    layout="wide",
-    page_icon="🌿",
-)
+# ------------------- PAGE CONFIG -------------------
+st.set_page_config(page_title="Elegant ESG Dashboard", layout="wide")
 
-# ------------------- Custom Green & White Theme -------------------
+# ------------------- HEADER -------------------
 st.markdown("""
-<style>
-#MainMenu, footer, header {visibility: hidden;}
-[data-testid="stAppViewContainer"] {
-    background-color: #f9fdf7;
-    color: #1b3a2a;
-    font-family: 'Helvetica', sans-serif;
-}
-[data-testid="stSidebar"] {
-    background-color: #e0f2db;
-    padding: 2rem;
-    color: #1b3a2a;
-    border-radius: 10px;
-}
-/* Sidebar headings - black & bold */
-section[data-testid="stSidebar"] label {
-    font-weight: 700 !important;
-    color: #000000 !important;
-}
-/* Dropdown arrows */
-[data-baseweb="select"] svg {
-    fill: #1b3a2a !important;
-}
-/* Slider */
-[data-baseweb="slider"] .baseweb-slider-thumb {
-    background-color: #2e7d32 !important;
-}
-[data-baseweb="slider"] .baseweb-slider-track {
-    background-color: #a7d5a1 !important;
-}
-/* Metric Cards */
-.card {
-    background: linear-gradient(135deg, #dff2e1, #b6e0a9);
-    border-radius: 14px;
-    min-width: 250px;
-    padding: 20px;
-    box-shadow: 0 6px 20px rgba(27,58,42,0.3);
-    flex: 0 0 auto;
-    transition: transform 0.2s;
-    margin-bottom: 15px;
-}
-.card:hover { transform: translateY(-5px); }
-.card-title { font-size: 14px; color: #1b3a2a; margin-bottom: 8px; }
-.card-value { font-size: 22px; font-weight: 700; color: #2e7d32; }
-.footer { text-align: center; color: #4b6f53; font-size: 13px; margin-top: 2rem; }
-</style>
+<h1 style='
+    text-align:center;
+    color:white;
+    font-size:48px;
+    font-weight:700;
+    font-family:Poppins, Helvetica, sans-serif;
+    letter-spacing:1px;
+    margin-bottom:5px;
+'> ESG Dashboard </h1>
+<p style='
+    text-align:center;
+    color:#d0d0d0;
+    font-size:16px;
+    font-style:italic;
+    margin-top:-10px;
+    letter-spacing:0.5px;
+'> Elegant insights into ESG & Financial Performance </p>
 """, unsafe_allow_html=True)
 
-# ------------------- Load Data -------------------
+st.markdown("---")
+
+# ------------------- LOAD DATA -------------------
 @st.cache_data
-def load_esg_data():
-    df = pd.read_csv("company_esg_financial_dataset.csv")
-    df.columns = df.columns.str.strip()
+def load_data():
+    df = pd.DataFrame({
+        "Company": ["TCS", "Infosys", "Reliance", "HDFC", "ITC", "Wipro", "Adani Green", "Axis Bank", "Nestle", "Tata Motors"],
+        "Industry": ["Technology", "Technology", "Energy", "Finance", "Retail", "Technology", "Energy", "Finance", "Retail", "Automobile"],
+        "Region": ["Asia"] * 10,
+        "ESG_Overall": [78, 82, 68, 74, 88, 80, 70, 76, 85, 72],
+        "Revenue": [50000, 46000, 120000, 70000, 40000, 30000, 25000, 35000, 42000, 38000],
+        "ProfitMargin": [18, 20, 15, 22, 25, 17, 14, 19, 24, 16],
+        "MarketCap": [1200000, 1100000, 2000000, 1500000, 800000, 700000, 650000, 900000, 1000000, 850000],
+        "GrowthRate": [9.5, 8.2, 10.1, 7.9, 6.8, 8.5, 11.2, 7.5, 6.9, 9.0]
+    })
     return df
 
-df = load_esg_data()
+df = load_data()
 
-# ------------------- Sidebar -------------------
+# ------------------- SIDEBAR -------------------
 with st.sidebar:
     st.markdown("<h3 style='color:black; font-weight:700;'>🔍 Filters</h3>", unsafe_allow_html=True)
 
     industry = st.selectbox(
         "**Select Industry**",
-        options=["All", "Technology", "Finance", "Energy", "Healthcare", "Retail"],
+        options=["All"] + sorted(df["Industry"].unique().tolist()),
         key="industry_filter"
     )
 
     region = st.selectbox(
         "**Select Region**",
-        options=["All", "North America", "Europe", "Asia", "South America"],
+        options=["All"] + sorted(df["Region"].unique().tolist()),
         key="region_filter"
     )
 
     esg_range = st.slider(
         "**Select ESG Score Range**",
-        min_value=0, max_value=100, value=(20, 80),
+        min_value=0, max_value=100, value=(20, 90),
         key="esg_range_filter"
     )
 
     st.markdown("<hr>", unsafe_allow_html=True)
     st.markdown("<p style='font-size:13px; color:gray; text-align:center;'>Use filters to customize ESG insights.</p>", unsafe_allow_html=True)
 
+# ------------------- FILTER LOGIC -------------------
+filtered_df = df.copy()
+if industry != "All":
+    filtered_df = filtered_df[filtered_df["Industry"] == industry]
+if region != "All":
+    filtered_df = filtered_df[filtered_df["Region"] == region]
+filtered_df = filtered_df[
+    (filtered_df["ESG_Overall"] >= esg_range[0]) & (filtered_df["ESG_Overall"] <= esg_range[1])
+]
 
-# ------------------- Header -------------------
-st.markdown("""
-<div style='text-align:center; margin-bottom:20px;'>
-    <h1 style='color:#1b3a2a; font-size:50px; font-weight:800; letter-spacing:2px;'>ESG Dashboard</h1>
-    <p style='color:#4b6f53; font-size:16px; font-style:italic; letter-spacing:1.5px;'>Elegant insights into ESG & financial performance</p>
-</div>
-""", unsafe_allow_html=True)
-
-# ------------------- Metric Cards -------------------
+# ------------------- METRICS -------------------
 metrics = {
     "Avg Revenue": f"₹{filtered_df['Revenue'].mean():,.0f}",
     "Avg Profit Margin": f"{filtered_df['ProfitMargin'].mean():.2f}%",
@@ -114,99 +89,95 @@ metrics = {
     "Avg Growth Rate": f"{filtered_df['GrowthRate'].mean():.2f}%"
 }
 
-metric_items = list(metrics.items())
-for i in range(0, len(metric_items), 2):
-    cols = st.columns(2)
-    for j, (metric, value) in enumerate(metric_items[i:i+2]):
-        with cols[j]:
-            st.markdown(f"""
-                <div class='card'>
-                    <div class='card-title'>{metric}</div>
-                    <div class='card-value'>{value}</div>
-                </div>
-            """, unsafe_allow_html=True)
+st.markdown("<div style='display:flex; flex-wrap:wrap; gap:20px; justify-content:center;'>", unsafe_allow_html=True)
+for metric, value in metrics.items():
+    st.markdown(f"""
+        <div style='
+            background-color:#1a1a1a;
+            border-radius:14px;
+            width:300px;
+            height:120px;
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
+            align-items:center;
+            box-shadow:0 4px 12px rgba(0,0,0,0.4);
+            transition: transform 0.2s ease;
+        '>
+            <div style='font-size:14px; color:#b0b0b0; margin-bottom:4px; text-align:center;'>{metric}</div>
+            <div style='font-size:20px; font-weight:700; color:#38bdf8; text-align:center;'>{value}</div>
+        </div>
+    """, unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)
 
-# ------------------- Plots -------------------
+st.markdown("---")
+
+# ------------------- GRAPHS -------------------
+
 col1, col2 = st.columns(2)
 
+# --- ESG Distribution (Box Plot - enhanced look) ---
 with col1:
-    st.subheader("ESG Score Distribution")
-    fig_hist = px.histogram(
+    st.subheader("📊 ESG Score Distribution")
+    fig_box = px.box(
         filtered_df,
-        x="ESG_Overall",
-        nbins=15,
-        color_discrete_sequence=["#2e7d32"]
+        x="Industry",
+        y="ESG_Overall",
+        color="Industry",
+        title="Industry-wise ESG Distribution",
+        points="all",
+        color_discrete_sequence=px.colors.qualitative.Set2
     )
-    fig_hist.update_layout(
+    fig_box.update_layout(
+        template='plotly_white',
+        title_font=dict(size=18, color='#333'),
         paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="#1b3a2a"),
-        xaxis_title="ESG Overall",
-        yaxis_title="Count"
+        plot_bgcolor="rgba(255,255,255,0.05)",
+        font=dict(color='#333', size=12),
+        yaxis=dict(title='ESG Score', gridcolor='rgba(0,0,0,0.1)')
     )
-    st.plotly_chart(fig_hist, use_container_width=True)
+    st.plotly_chart(fig_box, use_container_width=True)
 
+# --- Revenue vs ESG (Scatter Plot) ---
 with col2:
-    st.subheader("MarketCap vs ESG Score")
+    st.subheader("💰 Revenue vs ESG Score")
     fig_scatter = px.scatter(
         filtered_df,
-        x="ESG_Overall",
-        y="MarketCap",
-        size="Revenue",
-        color="ProfitMargin",
-        hover_data=["CompanyName", "GrowthRate"],
-        color_continuous_scale=px.colors.sequential.Greens
+        x="Revenue",
+        y="ESG_Overall",
+        color="Industry",
+        size="MarketCap",
+        hover_name="Company",
+        title="Revenue vs ESG Relationship",
+        color_discrete_sequence=px.colors.qualitative.Pastel
     )
     fig_scatter.update_layout(
+        template='plotly_white',
         paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="#1b3a2a"),
-        xaxis_title="ESG Overall",
-        yaxis_title="Market Cap"
+        plot_bgcolor="rgba(255,255,255,0.05)",
+        title_font=dict(size=18, color='#333'),
+        font=dict(color='#333')
     )
     st.plotly_chart(fig_scatter, use_container_width=True)
 
-# ------------------- Profit Margin Box Plot -------------------
-st.subheader("Profit Margin by Industry (Box Plot)")
-fig_box = px.box(
-    df,
-    x="Industry",
+# --- Profit Margin by Company ---
+st.subheader("🏆 Profit Margin by Company")
+fig_bar = px.bar(
+    filtered_df.sort_values("ProfitMargin", ascending=False),
+    x="Company",
     y="ProfitMargin",
-    color="Industry",
-    color_discrete_sequence=px.colors.qualitative.Prism,
-    points="all"
+    color="ProfitMargin",
+    title="Company-wise Profit Margins",
+    color_continuous_scale="Tealgrn"
 )
-fig_box.update_traces(
-    boxmean='sd',
-    marker=dict(size=7, opacity=0.8),
-    line=dict(width=2)
-)
-fig_box.update_layout(
+fig_bar.update_layout(
+    template='plotly_white',
     paper_bgcolor="rgba(0,0,0,0)",
-    plot_bgcolor="rgba(0,0,0,0)",
-    font=dict(color="#1b3a2a"),
-    xaxis_title="Industry",
-    yaxis_title="Profit Margin (%)",
-    xaxis_tickangle=-45
+    plot_bgcolor="rgba(255,255,255,0.05)",
+    font=dict(color='#333'),
+    title_font=dict(size=18, color='#333')
 )
-st.plotly_chart(fig_box, use_container_width=True)
+st.plotly_chart(fig_bar, use_container_width=True)
 
-# ------------------- ESG Radar -------------------
-st.subheader("ESG Component Breakdown (Radar Chart)")
-categories = ['ESG_Environmental', 'ESG_Social', 'ESG_Governance']
-avg_scores = [filtered_df[c].mean() for c in categories]
-fig_radar = go.Figure(data=go.Scatterpolar(
-    r=avg_scores,
-    theta=categories,
-    fill='toself',
-    line_color="#2e7d32"
-))
-fig_radar.update_layout(
-    polar=dict(bgcolor='#f9fdf7', radialaxis=dict(visible=True, color='#1b3a2a')),
-    paper_bgcolor="rgba(0,0,0,0)",
-    font_color="#1b3a2a"
-)
-st.plotly_chart(fig_radar, use_container_width=True)
-
-# ------------------- Footer -------------------
-st.markdown("<div class='footer'>🌿 ESG Dashboard &copy; 2025</div>", unsafe_allow_html=True)
+st.markdown("---")
+st.markdown("<p style='text-align:center; color:gray;'>© 2025 ESG Insights | Designed by Aditi ✨</p>", unsafe_allow_html=True)
