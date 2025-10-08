@@ -8,7 +8,7 @@ import numpy as np
 st.set_page_config(
     page_title="ESG Cinematic Dashboard",
     layout="wide",
-    page_icon="🌿",
+    # page_icon="🌿",
 )
 
 # ------------------- Custom Dark Theme CSS -------------------
@@ -273,4 +273,4 @@ else:
     st.plotly_chart(fig_radar, use_container_width=True)
 
 # ------------------- Footer -------------------
-st.markdown("<div class='footer'>🌿 ESG Dashboard &copy; 2025 </div>", unsafe_allow_html=True)
+st.markdown("<div class='footer'>ESG Dashboard &copy; 2025 </div>", unsafe_allow_html=True)
