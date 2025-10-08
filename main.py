@@ -8,62 +8,104 @@ import numpy as np
 st.set_page_config(
     page_title="ESG Cinematic Dashboard",
     layout="wide",
-    # page_icon="🌿",
+ 
 )
 
-# ------------------- Custom Dark Theme CSS -------------------
+# ------------------- Custom Cinematic Dark Theme CSS -------------------
+# Enhancements: Gradient Title, Polished Cards, Subtle Shadowing
 st.markdown("""
 <style>
-/* Remove the line below that hides the sidebar content, and ensure sidebar padding/style is correct */
-/* #MainMenu, footer, header {visibility: hidden;} */
+/* General App View */
+#MainMenu, footer {visibility: hidden;}
 [data-testid="stAppViewContainer"] {
-    background-color: #121212;
-    color: #e0e0e0;
+    background-color: #0d0d0d; /* Slightly darker base */
+    color: #f0f0f0;
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
-/* NOTE: The padding applied here should render the sidebar content which is correctly defined below */
+
+/* Sidebar */
 [data-testid="stSidebar"] {
-    background: #1e1e1e;
+    background: #1c1c1c; /* Darker, richer sidebar background */
     padding: 2rem;
-    color: #e0e0e0;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    color: #f0f0f0;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.7); /* Deeper shadow */
+    border-right: 1px solid #333333;
 }
 [data-testid="stSidebar"] h2 {
-    color: #e0e0e0 !important;
-    font-weight: 600;
+    color: #00C853 !important; /* Highlight sidebar header */
+    font-weight: 700;
+    border-bottom: 2px solid #333333;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
 }
+
+/* Cinematic Gradient Header */
+.cinematic-header {
+    text-align:center; 
+    margin-bottom:40px;
+}
+.cinematic-header h1 {
+    font-size: 60px;
+    letter-spacing: 4px;
+    margin: 0;
+    font-weight: 900;
+    text-transform: uppercase;
+    /* Subtle Green-to-Grey Gradient */
+    background: -webkit-linear-gradient(45deg, #00C853, #90ee90, #f0f0f0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 4px 10px rgba(0, 200, 83, 0.4);
+}
+.subtitle { 
+    color: #a0a0a0; 
+    font-size: 18px; 
+    font-style: italic;
+    margin-top: 10px;
+}
+
+/* Metric Cards */
 .card {
-    background: #1e1e1e;
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
-    transition: transform 0.3s, box-shadow 0.3s;
+    background: #1c1c1c;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+    transition: all 0.3s;
     text-align: center;
-    border: 1px solid #424242;
+    border-left: 5px solid #00C853; /* Highlight strip */
+    min-height: 120px;
 }
 .card:hover { 
-    transform: translateY(-8px); 
-    box-shadow: 0 10px 25px rgba(0,200,83,0.3);
+    transform: translateY(-5px) scale(1.02); 
+    box-shadow: 0 15px 30px rgba(0,200,83,0.4);
+    border-left: 5px solid #90ee90;
 }
-.card-title { font-size: 16px; color: #b0b0b0; margin-bottom: 6px; font-weight: 500;}
-.card-value { font-size: 28px; font-weight: 700; color: #00C853; }
-.footer { 
-    text-align: center; 
-    color: #a0a0a0; 
+.card-title { 
     font-size: 14px; 
-    margin-top: 3rem; 
-    padding-top: 1rem;
-    border-top: 1px solid #424242;
+    color: #909090; 
+    margin-bottom: 8px; 
+    font-weight: 600;
+    text-transform: uppercase;
 }
-/* Fixing the visibility of header/footer/mainmenu in wide-mode to keep sidebar */
-#MainMenu, footer {visibility: hidden;}
-/* Re-enabling the header if necessary, but hiding the main elements is often the cause of sidebar issues */
+.card-value { 
+    font-size: 32px; 
+    font-weight: 800; 
+    color: #90ee90; /* Brighter green for value */
+}
+
+/* Subheaders */
+h2 {
+    color: #00C853 !important;
+    padding-top: 20px;
+    padding-bottom: 10px;
+    margin-top: 30px;
+    border-bottom: 1px solid #333333;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
-# ------------------- Load Data -------------------
-# RESOLUTION: Replaced st.cache with st.cache_data
+# ------------------- Load Data (Using st.cache_data) -------------------
 @st.cache_data(show_spinner=False)
 def load_esg_data():
     try:
@@ -90,16 +132,18 @@ def load_esg_data():
 df = load_esg_data()
 
 # ------------------- Sidebar Filters -------------------
-# The content below is correctly placed within the sidebar using 'with st.sidebar:'
 with st.sidebar:
-    st.header("Filters")
+    st.header("Data Selection")
+    
+    # Filter setup
     industries = sorted(df["Industry"].dropna().unique())
     regions = sorted(df["Region"].dropna().unique())
 
-    selected_industry = st.selectbox("Select Industry", industries)
-    selected_region = st.selectbox("Select Region", regions)
+    selected_industry = st.selectbox("Select Industry", industries, index=industries.index('Tech') if 'Tech' in industries else 0)
+    selected_region = st.selectbox("Select Region", regions, index=regions.index('US') if 'US' in regions else 0)
     esg_min, esg_max = st.slider("Select ESG Overall Range", 0, 100, (60, 95))
 
+# Apply filters
 filtered_df = df[
     (df["Industry"] == selected_industry) &
     (df["Region"] == selected_region) &
@@ -107,15 +151,18 @@ filtered_df = df[
     (df["ESG_Overall"] <= esg_max)
 ]
 
-# ------------------- Header -------------------
+# ------------------- Header (Cinematic Look) -------------------
 st.markdown("""
-<div style='text-align:center; margin-bottom:20px;'>
-    <h1 style='font-size:50px; letter-spacing:2px; margin:0;'>ESG Dashboard</h1>
-    <p class='subtitle'>Elegant insights into ESG & financial performance</p>
+<div class='cinematic-header'>
+    <h1>ESG Dashboard</h1>
+    <p class='subtitle'>A deep-dive into sustainable and financial performance</p>
 </div>
 """, unsafe_allow_html=True)
 
 # ------------------- Metric Cards -------------------
+st.markdown("---")
+st.subheader("Key Performance Indicators (KPIs)")
+
 if not filtered_df.empty:
     avg_revenue = filtered_df['Revenue'].mean()
     avg_profit_margin = filtered_df['ProfitMargin'].mean()
@@ -144,33 +191,41 @@ for i, (metric, value) in enumerate(metrics.items()):
         """, unsafe_allow_html=True)
 
 # ------------------- PLOTS -------------------
+st.markdown("---")
+
 if filtered_df.empty:
     st.warning("No data available for the selected filters.")
 else:
-    # ESG Score Distribution (Histogram)
-    st.subheader("ESG Score Distribution")
-    fig_hist = px.histogram(
-        filtered_df,
-        x="ESG_Overall",
-        nbins=15,
-        color_discrete_sequence=["#00C853"],
-        title="Frequency of ESG Overall Scores"
-    )
-    fig_hist.update_traces(marker=dict(line=dict(width=1, color='rgba(0,0,0,0.2)')))
-    fig_hist.update_layout(
-        template='plotly_dark',
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        xaxis=dict(title="ESG Overall Score", showgrid=True, gridcolor="#2b2b2b"),
-        yaxis=dict(title="Count", showgrid=True, gridcolor="#2b2b2b"),
-    )
-    st.plotly_chart(fig_hist, use_container_width=True)
-
-    # Scatter and Box plots side by side
+    
+    # === Row 1: Histogram and Scatter ===
     col1, col2 = st.columns(2)
 
     with col1:
-        st.subheader("MarketCap vs ESG Score")
+        st.subheader("ESG Score Distribution")
+        fig_hist = px.histogram(
+            filtered_df,
+            x="ESG_Overall",
+            nbins=15,
+            color_discrete_sequence=["#90ee90"],
+            title="Frequency of ESG Overall Scores in Selection"
+        )
+        fig_hist.update_traces(
+            marker=dict(line=dict(width=1, color='rgba(0,0,0,0.5)'), opacity=0.9),
+            selector=dict(type='bar')
+        )
+        fig_hist.update_layout(
+            template='plotly_dark',
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(28,28,28,0.5)', # Slight background for plot area
+            font=dict(color="#f0f0f0"),
+            xaxis=dict(title="ESG Overall Score", showgrid=True, gridcolor="#2b2b2b"),
+            yaxis=dict(title="Count", showgrid=True, gridcolor="#2b2b2b"),
+            title_font_color="#f0f0f0",
+        )
+        st.plotly_chart(fig_hist, use_container_width=True)
+
+    with col2:
+        st.subheader("Market Cap vs. ESG Score")
         fig_scatter = px.scatter(
             filtered_df,
             x="ESG_Overall",
@@ -178,99 +233,101 @@ else:
             size="Revenue",
             color="ProfitMargin",
             hover_data=["CompanyName", "GrowthRate"],
-            color_continuous_scale=px.colors.sequential.Viridis,
+            color_continuous_scale=px.colors.sequential.Plotly3, # Brighter, more distinct scale
             title="Market Capitalization vs. ESG Performance"
         )
-        fig_scatter.update_traces(marker=dict(line=dict(width=1, color='rgba(0,0,0,0.3)')))
+        fig_scatter.update_traces(
+            marker=dict(line=dict(width=1, color='rgba(0,0,0,0.4)'))
+        )
         fig_scatter.update_layout(
             template='plotly_dark',
             paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(28,28,28,0.5)',
+            font=dict(color="#f0f0f0"),
             xaxis=dict(title="ESG Overall Score", showgrid=True, gridcolor="#2b2b2b"),
-            yaxis=dict(title="Market Cap (₹)", showgrid=True, gridcolor="#2b2b2b")
+            yaxis=dict(title="Market Cap (₹)", showgrid=True, gridcolor="#2b2b2b"),
+            title_font_color="#f0f0f0",
         )
         st.plotly_chart(fig_scatter, use_container_width=True)
-
-    with col2:
-        st.subheader("Profit Margin by Industry")
+    
+    st.markdown("---")
+    
+    # === Row 2: Box Plot and Radar Chart ===
+    col3, col4 = st.columns(2)
+    
+    with col3:
+        st.subheader("Profit Margin Distribution by Industry")
         fig_box = px.box(
-            df,
+            df, # Use the full DF for broader industry comparison
             x="Industry",
             y="ProfitMargin",
             color="Industry",
-            color_discrete_sequence=px.colors.qualitative.Pastel,
+            color_discrete_sequence=px.colors.qualitative.D3, # Clean, distinct colors
             points="all",
-            hover_data={"ProfitMargin": True, "Industry": True}
+            hover_data={"ProfitMargin": True, "Industry": True},
+            title="Industry-wide Profit Margin Comparison"
         )
         fig_box.update_traces(
             boxmean='sd',
-            marker=dict(size=5, opacity=0.8, color="#00C853", line=dict(width=1, color='rgba(0,0,0,0.5)')),
-            line=dict(width=2, color="#00C853"),
-            fillcolor='rgba(0, 200, 83, 0.2)',
-            opacity=0.8,
-            jitter=0.4
+            marker=dict(size=6, opacity=0.8, line=dict(width=1, color='rgba(0,0,0,0.5)')),
+            opacity=0.9,
+            jitter=0.3
         )
         fig_box.update_layout(
             template='plotly_dark',
             paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)',
-            xaxis=dict(
-                title=dict(
-                    text="Industry",
-                    font=dict(color='#e0e0e0')
-                ),
-                tickangle=-30,
-                showgrid=False,
-                color='#e0e0e0'
-            ),
-            yaxis=dict(
-                title=dict(
-                    text="Profit Margin (%)",
-                    font=dict(color='#e0e0e0')
-                ),
-                showgrid=True,
-                gridcolor="#2b2b2b",
-                color='#e0e0e0'
-            )
+            plot_bgcolor='rgba(28,28,28,0.5)',
+            font=dict(color="#f0f0f0"),
+            xaxis=dict(title="Industry", showgrid=False, color='#f0f0f0', tickangle=-15),
+            yaxis=dict(title="Profit Margin (%)", showgrid=True, gridcolor="#2b2b2b", color='#f0f0f0'),
+            showlegend=False,
+            title_font_color="#f0f0f0",
         )
         st.plotly_chart(fig_box, use_container_width=True)
 
-    # ESG Radar Chart
-    st.subheader("ESG Component Breakdown (Radar Chart)")
-    categories = ['ESG_Environmental', 'ESG_Social', 'ESG_Governance']
-    avg_scores = [filtered_df[c].mean() for c in categories]
-    r_values = avg_scores + avg_scores[:1]
-    theta_values = categories + categories[:1]
+    with col4:
+        st.subheader("ESG Component Breakdown")
+        categories = ['ESG_Environmental', 'ESG_Social', 'ESG_Governance']
+        avg_scores = [filtered_df[c].mean() for c in categories]
+        r_values = avg_scores + avg_scores[:1]
+        theta_values = categories + categories[:1]
 
-    fig_radar = go.Figure(data=go.Scatterpolar(
-        r=r_values,
-        theta=theta_values,
-        fill='toself',
-        line_color="#00C853",
-        line=dict(width=4),
-        marker=dict(size=8),
-        hovertemplate="<b>%{theta}</b>: %{r:.2f}<extra></extra>"
-    ))
-    fig_radar.update_layout(
-        template='plotly_dark',
-        paper_bgcolor='rgba(0,0,0,0)',
-        polar=dict(
-            bgcolor='#1e1e1e',
-            radialaxis=dict(
-                visible=True,
-                range=[0, 100],
-                gridcolor="#2b2b2b",
-                linecolor="#424242",
-                color='#e0e0e0'
+        fig_radar = go.Figure(data=go.Scatterpolar(
+            r=r_values,
+            theta=theta_values,
+            fill='toself',
+            line_color="#90ee90", # Bright line color
+            line=dict(width=5),
+            marker=dict(size=10, symbol='circle', color="#00C853", line=dict(color="#f0f0f0", width=2)),
+            opacity=0.7,
+            hovertemplate="<b>%{theta}</b>: %{r:.2f}<extra></extra>"
+        ))
+        fig_radar.update_layout(
+            template='plotly_dark',
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            polar=dict(
+                bgcolor='#1c1c1c', # Darker radar background
+                radialaxis=dict(
+                    visible=True,
+                    range=[0, 100],
+                    gridcolor="#333333",
+                    linecolor="#555555",
+                    color='#f0f0f0',
+                    tickfont=dict(size=10)
+                ),
+                angularaxis=dict(
+                    linecolor='#555555',
+                    color='#f0f0f0',
+                    tickfont=dict(size=12)
+                )
             ),
-            angularaxis=dict(
-                linecolor='#424242'
-            )
-        ),
-        font_size=14,
-        title="Average Component Scores"
-    )
-    st.plotly_chart(fig_radar, use_container_width=True)
+            font_size=14,
+            title=dict(text="Average Component Scores in Selection", font=dict(color="#f0f0f0"))
+        )
+        st.plotly_chart(fig_radar, use_container_width=True)
+
 
 # ------------------- Footer -------------------
-st.markdown("<div class='footer'>ESG Dashboard &copy; 2025 </div>", unsafe_allow_html=True)
+st.markdown("---")
+st.markdown("<div class='footer'> ESG Dashboard &copy; 2025 | Developed with Streamlit and Plotly </div>", unsafe_allow_html=True)
