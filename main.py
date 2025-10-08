@@ -3,14 +3,14 @@ import pandas as pd
 import plotly.express as px
 
 # ------------------- PAGE CONFIG -------------------
-st.set_page_config(page_title="Elegant ESG Dashboard", layout="wide")
+st.set_page_config(page_title="ESG Dashboard", layout="wide")
 
 # ------------------- HEADER -------------------
 st.markdown("""
 <h1 style='
     text-align:center;
-    color:white;
-    font-size:48px;
+    color:#e8f5e9;
+    font-size:50px;
     font-weight:700;
     font-family:Poppins, Helvetica, sans-serif;
     letter-spacing:1px;
@@ -18,7 +18,7 @@ st.markdown("""
 '> ESG Dashboard </h1>
 <p style='
     text-align:center;
-    color:#d0d0d0;
+    color:#a5d6a7;
     font-size:16px;
     font-style:italic;
     margin-top:-10px;
@@ -47,7 +47,7 @@ df = load_data()
 
 # ------------------- SIDEBAR -------------------
 with st.sidebar:
-    st.markdown("<h3 style='color:black; font-weight:700;'>🔍 Filters</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color:#00c853; font-weight:700;'>Filters</h3>", unsafe_allow_html=True)
 
     industry = st.selectbox(
         "**Select Industry**",
@@ -67,8 +67,8 @@ with st.sidebar:
         key="esg_range_filter"
     )
 
-    st.markdown("<hr>", unsafe_allow_html=True)
-    st.markdown("<p style='font-size:13px; color:gray; text-align:center;'>Use filters to customize ESG insights.</p>", unsafe_allow_html=True)
+    st.markdown("<hr style='border: 0.5px solid #333;'>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size:13px; color:#777;'>Use filters to refine insights.</p>", unsafe_allow_html=True)
 
 # ------------------- FILTER LOGIC -------------------
 filtered_df = df.copy()
@@ -82,30 +82,31 @@ filtered_df = filtered_df[
 
 # ------------------- METRICS -------------------
 metrics = {
-    "Avg Revenue": f"₹{filtered_df['Revenue'].mean():,.0f}",
-    "Avg Profit Margin": f"{filtered_df['ProfitMargin'].mean():.2f}%",
-    "Avg ESG Score": f"{filtered_df['ESG_Overall'].mean():.2f}",
+    "Average Revenue": f"₹{filtered_df['Revenue'].mean():,.0f}",
+    "Profit Margin": f"{filtered_df['ProfitMargin'].mean():.2f}%",
+    "ESG Score": f"{filtered_df['ESG_Overall'].mean():.2f}",
     "Max Market Cap": f"₹{filtered_df['MarketCap'].max():,.0f}",
-    "Avg Growth Rate": f"{filtered_df['GrowthRate'].mean():.2f}%"
+    "Growth Rate": f"{filtered_df['GrowthRate'].mean():.2f}%"
 }
 
-st.markdown("<div style='display:flex; flex-wrap:wrap; gap:20px; justify-content:center;'>", unsafe_allow_html=True)
+st.markdown("<div style='display:flex; flex-wrap:wrap; gap:25px; justify-content:center;'>", unsafe_allow_html=True)
 for metric, value in metrics.items():
     st.markdown(f"""
         <div style='
-            background-color:#1a1a1a;
+            background-color:#0f0f0f;
+            border:1px solid #1b5e20;
             border-radius:14px;
-            width:300px;
-            height:120px;
+            width:280px;
+            height:110px;
             display:flex;
             flex-direction:column;
             justify-content:center;
             align-items:center;
-            box-shadow:0 4px 12px rgba(0,0,0,0.4);
-            transition: transform 0.2s ease;
-        '>
-            <div style='font-size:14px; color:#b0b0b0; margin-bottom:4px; text-align:center;'>{metric}</div>
-            <div style='font-size:20px; font-weight:700; color:#38bdf8; text-align:center;'>{value}</div>
+            box-shadow:0 4px 14px rgba(0, 128, 0, 0.3);
+            transition: all 0.3s ease;
+        ' onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">
+            <div style='font-size:14px; color:#81c784; margin-bottom:5px;'>{metric}</div>
+            <div style='font-size:20px; font-weight:700; color:#00e676;'>{value}</div>
         </div>
     """, unsafe_allow_html=True)
 st.markdown("</div>", unsafe_allow_html=True)
@@ -116,9 +117,9 @@ st.markdown("---")
 
 col1, col2 = st.columns(2)
 
-# --- ESG Distribution (Box Plot - enhanced look) ---
+# --- ESG Distribution (Box Plot) ---
 with col1:
-    st.subheader("📊 ESG Score Distribution")
+    st.subheader("ESG Score Distribution")
     fig_box = px.box(
         filtered_df,
         x="Industry",
@@ -126,21 +127,22 @@ with col1:
         color="Industry",
         title="Industry-wise ESG Distribution",
         points="all",
-        color_discrete_sequence=px.colors.qualitative.Set2
+        color_discrete_sequence=px.colors.sequential.Greens
     )
     fig_box.update_layout(
-        template='plotly_white',
-        title_font=dict(size=18, color='#333'),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(255,255,255,0.05)",
-        font=dict(color='#333', size=12),
-        yaxis=dict(title='ESG Score', gridcolor='rgba(0,0,0,0.1)')
+        template='plotly_dark',
+        paper_bgcolor="#0a0a0a",
+        plot_bgcolor="#0a0a0a",
+        title_font=dict(size=18, color='#00e676'),
+        font=dict(color='#c8e6c9'),
+        yaxis=dict(gridcolor="#1b5e20"),
+        xaxis=dict(gridcolor="#1b5e20")
     )
     st.plotly_chart(fig_box, use_container_width=True)
 
 # --- Revenue vs ESG (Scatter Plot) ---
 with col2:
-    st.subheader("💰 Revenue vs ESG Score")
+    st.subheader("Revenue vs ESG Score")
     fig_scatter = px.scatter(
         filtered_df,
         x="Revenue",
@@ -149,35 +151,35 @@ with col2:
         size="MarketCap",
         hover_name="Company",
         title="Revenue vs ESG Relationship",
-        color_discrete_sequence=px.colors.qualitative.Pastel
+        color_discrete_sequence=px.colors.sequential.Greens
     )
     fig_scatter.update_layout(
-        template='plotly_white',
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(255,255,255,0.05)",
-        title_font=dict(size=18, color='#333'),
-        font=dict(color='#333')
+        template='plotly_dark',
+        paper_bgcolor="#0a0a0a",
+        plot_bgcolor="#0a0a0a",
+        title_font=dict(size=18, color='#00e676'),
+        font=dict(color='#c8e6c9')
     )
     st.plotly_chart(fig_scatter, use_container_width=True)
 
 # --- Profit Margin by Company ---
-st.subheader("🏆 Profit Margin by Company")
+st.subheader("Profit Margin by Company")
 fig_bar = px.bar(
     filtered_df.sort_values("ProfitMargin", ascending=False),
     x="Company",
     y="ProfitMargin",
     color="ProfitMargin",
     title="Company-wise Profit Margins",
-    color_continuous_scale="Tealgrn"
+    color_continuous_scale="Greens"
 )
 fig_bar.update_layout(
-    template='plotly_white',
-    paper_bgcolor="rgba(0,0,0,0)",
-    plot_bgcolor="rgba(255,255,255,0.05)",
-    font=dict(color='#333'),
-    title_font=dict(size=18, color='#333')
+    template='plotly_dark',
+    paper_bgcolor="#0a0a0a",
+    plot_bgcolor="#0a0a0a",
+    font=dict(color='#c8e6c9'),
+    title_font=dict(size=18, color='#00e676')
 )
 st.plotly_chart(fig_bar, use_container_width=True)
 
 st.markdown("---")
-st.markdown("<p style='text-align:center; color:gray;'>© 2025 ESG Insights | Designed by Aditi ✨</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align:center; color:#81c784;'>© 2025 ESG Insights | Designed by Aditi 🌿</p>", unsafe_allow_html=True)
