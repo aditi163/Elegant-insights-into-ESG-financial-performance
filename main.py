@@ -73,20 +73,29 @@ df = load_esg_data()
 
 # ------------------- Sidebar -------------------
 with st.sidebar:
-    st.header("Filters")
-    industries = sorted(df["Industry"].dropna().unique())
-    regions = sorted(df["Region"].dropna().unique())
+    st.markdown("<h3 style='color:black; font-weight:700;'>🔍 Filters</h3>", unsafe_allow_html=True)
 
-    selected_industry = st.selectbox("Select Industry", industries)
-    selected_region = st.selectbox("Select Region", regions)
-    esg_min, esg_max = st.slider("Select ESG Overall Range", 0, 100, (40, 90))
+    industry = st.selectbox(
+        "**Select Industry**",
+        options=["All", "Technology", "Finance", "Energy", "Healthcare", "Retail"],
+        key="industry_filter"
+    )
 
-filtered_df = df[
-    (df["Industry"] == selected_industry) &
-    (df["Region"] == selected_region) &
-    (df["ESG_Overall"] >= esg_min) &
-    (df["ESG_Overall"] <= esg_max)
-]
+    region = st.selectbox(
+        "**Select Region**",
+        options=["All", "North America", "Europe", "Asia", "South America"],
+        key="region_filter"
+    )
+
+    esg_range = st.slider(
+        "**Select ESG Score Range**",
+        min_value=0, max_value=100, value=(20, 80),
+        key="esg_range_filter"
+    )
+
+    st.markdown("<hr>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size:13px; color:gray; text-align:center;'>Use filters to customize ESG insights.</p>", unsafe_allow_html=True)
+
 
 # ------------------- Header -------------------
 st.markdown("""
