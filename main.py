@@ -3,14 +3,14 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-# ---------------- Page Config ----------------
+# ----------------- Page Config -----------------
 st.set_page_config(
     page_title="ESG Cinematic Dashboard",
     layout="wide",
     page_icon="🌿"
 )
 
-# ---------------- Custom Dark Theme CSS ----------------
+# ----------------- Custom Dark Theme CSS -----------------
 st.markdown("""
 <style>
 #MainMenu, footer, header {visibility: hidden;}
@@ -18,17 +18,19 @@ st.markdown("""
     background-color: #121212;
     color: #e0e0e0;
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    padding-left: 1rem;
+    padding-right: 1rem;
 }
 [data-testid="stSidebar"] {
-    background: #1e1e1e;
-    padding: 2rem;
-    color: #e0e0e0;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    background: #1e1e1e !important;
+    padding: 2rem !important;
+    color: #e0e0e0 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important;
 }
 [data-testid="stSidebar"] h2 {
     color: #e0e0e0 !important;
-    font-weight: 600;
+    font-weight: 600 !important;
 }
 .card {
     background: #1e1e1e;
@@ -38,9 +40,10 @@ st.markdown("""
     transition: transform 0.3s, box-shadow 0.3s;
     text-align: center;
     border: 1px solid #424242;
+    margin-bottom: 1rem;
 }
 .card:hover { 
-    transform: translateY(-8px); 
+    transform: translateY(-6px); 
     box-shadow: 0 10px 25px rgba(0,200,83,0.3);
 }
 .card-title { font-size: 16px; color: #b0b0b0; margin-bottom: 6px; font-weight: 500;}
@@ -56,14 +59,14 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# -------------- Load Data -------------------
+# ----------------- Load Data -----------------
 @st.cache_data(show_spinner=False)
 def load_esg_data():
     try:
         df = pd.read_csv("company_esg_financial_dataset.csv")
         df.columns = df.columns.str.strip()
     except FileNotFoundError:
-        st.warning("CSV file not found. Loading mock data for demo.")
+        st.warning("CSV file not found. Loading mock data.")
         data = {
             'CompanyName': ['Alpha Solutions', 'Beta Corp', 'Gamma Energy', 'Delta Finance', 'Epsilon Innovations', 'Zeta Tech', 'Eta Energy', 'Theta Finance', 'Iota Corp', 'Kappa Solutions', 'Alpha Innovate'],
             'Industry': ['Tech', 'Tech', 'Energy', 'Finance', 'Tech', 'Energy', 'Finance', 'Tech', 'Energy', 'Finance', 'Retail'],
@@ -82,7 +85,7 @@ def load_esg_data():
 
 df = load_esg_data()
 
-# -------------- Sidebar Filters -------------------
+# ----------------- Sidebar Filters -----------------
 with st.sidebar:
     st.header("Filters")
     industries = sorted(df["Industry"].dropna().unique())
@@ -91,23 +94,23 @@ with st.sidebar:
     selected_region = st.selectbox("Select Region", regions)
     esg_min, esg_max = st.slider("Select ESG Overall Range", 0, 100, (60, 95))
 
-# -------- Filter Data Based on Selections --------
+# Filter dataframe based on sidebar selections
 filtered_df = df[
     (df["Industry"] == selected_industry) &
     (df["Region"] == selected_region) &
-    (df["ESG_Overall"] >= esg_min) &
+    (df["ESG_Overall"] >= esg_min) & 
     (df["ESG_Overall"] <= esg_max)
 ]
 
-# -------------- Header -------------------
+# ----------------- Header -----------------
 st.markdown("""
 <div style='text-align:center; margin-bottom:20px;'>
-    <h1 style='font-size:50px; letter-spacing:2px; margin:0;'>ESG Dashboard</h1>
-    <p class='subtitle'>Elegant insights into ESG & financial performance</p>
+    <h1 style='font-weight: 800; font-size: 48px; letter-spacing: 2px; margin: 0;'>ESG Dashboard</h1>
+    <p style='color: #8fbc8f; font-size: 18px; font-style: italic; margin-top: 5px;'>Elegant insights into ESG & financial performance</p>
 </div>
 """, unsafe_allow_html=True)
 
-# -------------- Metric Cards -------------------
+# ----------------- Metric Cards -----------------
 if not filtered_df.empty:
     avg_revenue = filtered_df['Revenue'].mean()
     avg_profit_margin = filtered_df['ProfitMargin'].mean()
@@ -135,17 +138,18 @@ for i, (metric, value) in enumerate(metrics.items()):
             </div>
         """, unsafe_allow_html=True)
 
-# -------------- Plots -------------------
+# ----------------- Visualizations -----------------
 if filtered_df.empty:
     st.warning("No data available for the selected filters.")
 else:
+    # ESG Score Distribution Histogram
     st.subheader("ESG Score Distribution")
     fig_hist = px.histogram(
         filtered_df,
         x="ESG_Overall",
         nbins=15,
         color_discrete_sequence=["#00C853"],
-        title="Frequency of ESG Overall Scores"
+        title="ESG Overall Score Frequency"
     )
     fig_hist.update_traces(marker=dict(line=dict(width=1, color='rgba(0,0,0,0.2)')))
     fig_hist.update_layout(
@@ -153,14 +157,15 @@ else:
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         xaxis=dict(title="ESG Overall Score", showgrid=True, gridcolor="#2b2b2b"),
-        yaxis=dict(title="Count", showgrid=True, gridcolor="#2b2b2b"),
+        yaxis=dict(title="Count", showgrid=True, gridcolor="#2b2b2b")
     )
     st.plotly_chart(fig_hist, use_container_width=True)
 
+    # Side-by-side Scatter and Box Plot
     col1, col2 = st.columns(2)
 
     with col1:
-        st.subheader("MarketCap vs ESG Score")
+        st.subheader("Market Cap vs ESG Score")
         fig_scatter = px.scatter(
             filtered_df,
             x="ESG_Overall",
@@ -169,7 +174,7 @@ else:
             color="ProfitMargin",
             hover_data=["CompanyName", "GrowthRate"],
             color_continuous_scale=px.colors.sequential.Viridis,
-            title="Market Capitalization vs. ESG Performance"
+            title="Market Capitalization vs ESG Performance"
         )
         fig_scatter.update_traces(marker=dict(line=dict(width=1, color='rgba(0,0,0,0.3)')))
         fig_scatter.update_layout(
@@ -205,19 +210,13 @@ else:
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
             xaxis=dict(
-                title=dict(
-                    text="Industry",
-                    font=dict(color='#e0e0e0')
-                ),
+                title=dict(text="Industry", font=dict(color='#e0e0e0')),
                 tickangle=-30,
                 showgrid=False,
                 color='#e0e0e0'
             ),
             yaxis=dict(
-                title=dict(
-                    text="Profit Margin (%)",
-                    font=dict(color='#e0e0e0')
-                ),
+                title=dict(text="Profit Margin (%)", font=dict(color='#e0e0e0')),
                 showgrid=True,
                 gridcolor="#2b2b2b",
                 color='#e0e0e0'
@@ -225,6 +224,7 @@ else:
         )
         st.plotly_chart(fig_box, use_container_width=True)
 
+    # ESG Radar Chart
     st.subheader("ESG Component Breakdown (Radar Chart)")
     categories = ['ESG_Environmental', 'ESG_Social', 'ESG_Governance']
     avg_scores = [filtered_df[c].mean() for c in categories]
@@ -252,14 +252,12 @@ else:
                 linecolor="#424242",
                 color='#e0e0e0'
             ),
-            angularaxis=dict(
-                linecolor='#424242'
-            )
+            angularaxis=dict(linecolor='#424242')
         ),
         font_size=14,
-        title="Average Component Scores"
+        title="Average ESG Component Scores"
     )
     st.plotly_chart(fig_radar, use_container_width=True)
 
-# -------------- Footer -------------------
-st.markdown("<div class='footer'>🌿 ESG Dashboard &copy; 2025 </div>", unsafe_allow_html=True)
+# ---------------- Footer -----------------
+st.markdown("<div class='footer'>🌿 ESG Dashboard ©️ 2025</div>", unsafe_allow_html=True)
