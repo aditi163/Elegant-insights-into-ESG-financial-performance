@@ -330,4 +330,4 @@ else:
 
 # ------------------- Footer -------------------
 st.markdown("---")
-st.markdown("<div class='footer'> ESG Dashboard &copy; 2025 | Developed with Streamlit and Plotly </div>", unsafe_allow_html=True)
+st.markdown("<div class='footer'> ESG Dashboard &copy; 2025</div>", unsafe_allow_html=True)
